@@ -7,8 +7,8 @@ Install-Module -Name 7Zip4Powershell -Confirm:$False -Force
 
 
 $artifactory_url = "https://jfrog.sdp.i.mercedes-benz.com"
-$artifactory_user = "TE12148"
-$artifactory_password = ConvertTo-SecureString -AsPlainText '}HFN4T,i}AjuQ3zA2PGO' -Force
+$artifactory_user = "Enter your UserName"
+$artifactory_password = ConvertTo-SecureString -AsPlainText 'Enter your Password' -Force
 $artifactory_repo = "artifactory/CDW-CDW/client_setup_files_cdw/cdcctools"
 $artifact_name = "PREEvisionV1050_Power_PROD.7z"
 

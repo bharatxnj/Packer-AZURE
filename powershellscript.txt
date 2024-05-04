@@ -1,0 +1,43 @@
+$ProgressPreference = 'SilentlyContinue'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+#Add-Type -AssemblyName System.IO.Compression.FileSystem -PassThru
+Install-PackageProvider -Name NuGet -confirm:$False -Force 
+Install-Module -Name 7Zip4Powershell -Confirm:$False -Force
+#Install-PackageProvider -Name NuGet -confirm:$False -Force
+
+
+$artifactory_url = "https://jfrog.sdp.i.mercedes-benz.com"
+$artifactory_user = "TE12148"
+$artifactory_password = ConvertTo-SecureString -AsPlainText '}HFN4T,i}AjuQ3zA2PGO' -Force
+$artifactory_repo = "artifactory/CDW-CDW/client_setup_files_cdw/cdcctools"
+$artifact_name = "PREEvisionV1050_Power_PROD.7z"
+
+# Destination folder path (replace with desired location)
+$destination_folder = "C:\prevision\"
+
+# Convert SecureString password to plain text
+$BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($artifactory_password)
+$password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+
+# Download the 7zip file from Artifactory
+$username = $artifactory_user
+$authHeader = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($username):$($password)"))
+$downloadUrl = "$artifactory_url/$artifactory_repo/$artifact_name"
+
+try {
+  $downloadResponse = Invoke-webrequest -Uri $downloadUrl -UseBasicParsing -Method Get -Headers @{Authorization = $authHeader} -OutFile (New-Item -ItemType File -Path "$destination_folder\$artifact_name" -Force)
+  Write-Host "7zip file downloaded successfully to: $destination_folder\$artifact_name"
+} catch {
+  Write-Error "Error downloading file: $_"
+  Exit 1
+}
+
+# Create the folder (if it doesn't exist)
+if (!(Test-Path $destination_folder)) {
+  New-Item -ItemType Directory -Path $destination_folder | Out-Null
+  Write-Host "Destination folder created: $destination_folder"
+}
+
+Expand-7zip -archivefilename "C:\prevision\PREEvisionV1050_Power_PROD.7z" -TargetPath "C:\prevision"
+
+#& "C:\Program Files\7-Zip\7z.exe" x "Path\to\your\file.7z" -o"Path\to\destination\directory"
